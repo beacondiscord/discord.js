@@ -10,8 +10,8 @@ const {
 const Util = require('../util/Util');
 
 function parseResponse(res) {
-  if (res.headers.get('content-type').startsWith('application/json')) return res.json();
-  return res.buffer();
+  if (res.headers['content-type'].startsWith('application/json')) return res.json();
+  return res.body;
 }
 
 function getAPIOffset(serverDate) {
@@ -20,10 +20,9 @@ function getAPIOffset(serverDate) {
 
 function calculateReset(reset, resetAfter, serverDate) {
   // Use direct reset time when available, server date becomes irrelevant in this case
-  if (resetAfter) {
-    return Date.now() + Number(resetAfter) * 1_000;
-  }
-  return new Date(Number(reset) * 1_000).getTime() - getAPIOffset(serverDate);
+  if (resetAfter) return Date.now() + Number(resetAfter) * 1000;
+
+  return new Date(Number(reset) * 1000).getTime() - getAPIOffset(serverDate);
 }
 
 /* Invalid request limiting is done on a per-IP basis, not a per-token basis.
@@ -97,9 +96,7 @@ class RequestHandler {
       typeof options.rejectOnRateLimit === 'function'
         ? await options.rejectOnRateLimit(rateLimitData)
         : options.rejectOnRateLimit.some(route => rateLimitData.route.startsWith(route.toLowerCase()));
-    if (shouldThrow) {
-      throw new RateLimitError(rateLimitData);
-    }
+    if (shouldThrow) throw new RateLimitError(rateLimitData);
   }
 
   async execute(request) {
@@ -178,11 +175,11 @@ class RequestHandler {
 
     let sublimitTimeout;
     if (res.headers) {
-      const serverDate = res.headers.get('date');
-      const limit = res.headers.get('x-ratelimit-limit');
-      const remaining = res.headers.get('x-ratelimit-remaining');
-      const reset = res.headers.get('x-ratelimit-reset');
-      const resetAfter = res.headers.get('x-ratelimit-reset-after');
+      const serverDate = res.headers.date;
+      const limit = res.headers['x-ratelimit-limit'];
+      const remaining = res.headers['x-ratelimit-remaining'];
+      const reset = res.headers['x-ratelimit-reset'];
+      const resetAfter = res.headers['x-ratelimit-reset-after'];
       this.limit = limit ? Number(limit) : Infinity;
       this.remaining = remaining ? Number(remaining) : 1;
 
@@ -194,11 +191,11 @@ class RequestHandler {
       }
 
       // Handle retryAfter, which means we have actually hit a rate limit
-      let retryAfter = res.headers.get('retry-after');
-      retryAfter = retryAfter ? Number(retryAfter) * 1_000 : -1;
+      let retryAfter = res.headers['retry-after'];
+      retryAfter = retryAfter ? Number(retryAfter) * 1000 : -1;
       if (retryAfter > 0) {
         // If the global ratelimit header is set, that means we hit the global rate limit
-        if (res.headers.get('x-ratelimit-global')) {
+        if (res.headers['x-ratelimit-global']) {
           this.manager.globalRemaining = 0;
           this.manager.globalReset = Date.now() + retryAfter;
         } else if (!this.localLimited) {
@@ -213,9 +210,9 @@ class RequestHandler {
     }
 
     // Count the invalid requests
-    if (res.status === 401 || res.status === 403 || res.status === 429) {
+    if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 429) {
       if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
-        invalidCountResetTime = Date.now() + 1_000 * 60 * 10;
+        invalidCountResetTime = Date.now() + 1000 * 60 * 10;
         invalidCount = 0;
       }
       invalidCount++;
@@ -245,15 +242,15 @@ class RequestHandler {
     }
 
     // Handle 2xx and 3xx responses
-    if (res.ok) {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
       // Nothing wrong with the request, proceed with the next one
       return parseResponse(res);
     }
 
     // Handle 4xx responses
-    if (res.status >= 400 && res.status < 500) {
+    if (res.statusCode >= 400 && res.statusCode < 500) {
       // Handle ratelimited requests
-      if (res.status === 429) {
+      if (res.statusCode === 429) {
         const isGlobal = this.globalLimited;
         let limit, timeout;
         if (isGlobal) {
@@ -281,9 +278,8 @@ class RequestHandler {
         await this.onRateLimit(request, limit, timeout, isGlobal);
 
         // If caused by a sublimit, wait it out here so other requests on the route can be handled
-        if (sublimitTimeout) {
-          await Util.delayFor(sublimitTimeout);
-        }
+        if (sublimitTimeout) await Util.delayFor(sublimitTimeout);
+
         return this.execute(request);
       }
 
@@ -295,21 +291,21 @@ class RequestHandler {
         throw new HTTPError(err.message, err.constructor.name, err.status, request);
       }
 
-      throw new DiscordAPIError(data, res.status, request);
+      throw new DiscordAPIError(data, res.statusCode, request);
     }
 
     // Handle 5xx responses
-    if (res.status >= 500 && res.status < 600) {
+    if (res.statusCode >= 500 && res.statusCode < 600) {
       // Retry the specified number of times for possible serverside issues
       if (request.retries === this.manager.client.options.retryLimit) {
-        throw new HTTPError(res.statusText, res.constructor.name, res.status, request);
+        throw new HTTPError(res.statusText, res.constructor.name, res.statusCode, request);
       }
 
       request.retries++;
       return this.execute(request);
     }
 
-    // Fallback in the rare case a status code outside the range 200..=599 is returned
+    // Fallback in the rare case a statusCode code outside the range 200..=599 is returned
     return null;
   }
 }
