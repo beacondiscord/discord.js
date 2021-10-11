@@ -2,7 +2,7 @@
 
 const { parse } = require('node:path');
 const { Collection } = require('@discordjs/collection');
-const fetch = require('node-fetch');
+const fetch = require('petitio');
 const { Colors, Endpoints } = require('./Constants');
 const Options = require('./Options');
 const { Error: DiscordError, RangeError, TypeError } = require('../errors');
@@ -270,12 +270,11 @@ class Util extends null {
   static async fetchRecommendedShards(token, { guildsPerShard = 1_000, multipleOf = 1 } = {}) {
     if (!token) throw new DiscordError('TOKEN_MISSING');
     const defaults = Options.createDefault();
-    const response = await fetch(`${defaults.http.api}/v${defaults.http.version}${Endpoints.botGateway}`, {
-      method: 'GET',
-      headers: { Authorization: `Bot ${token.replace(/^Bot\s*/i, '')}` },
-    });
-    if (!response.ok) {
-      if (response.status === 401) throw new DiscordError('TOKEN_INVALID');
+    const response = await fetch(`${defaults.http.api}/v${defaults.http.version}${Endpoints.botGateway}`)
+      .header('Authorization', `Bot ${token.replace(/^Bot\s*/i, '')}`)
+      .send();
+    if (!response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.statusCode === 401) throw new DiscordError('TOKEN_INVALID');
       throw response;
     }
     const { shards } = await response.json();
