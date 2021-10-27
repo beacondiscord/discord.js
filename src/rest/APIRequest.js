@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 'use strict';
 
 const FormData = require('@discordjs/form-data');
@@ -31,7 +32,7 @@ class APIRequest {
 
   make() {
     const API =
-      this.options.versioned === false
+      this.options.versioned == false
         ? this.client.options.http.api
         : `${this.client.options.http.api}/v${this.client.options.http.version}`;
     const url = API + this.path;
@@ -41,21 +42,21 @@ class APIRequest {
       'User-Agent': this.fullUserAgent,
     };
 
-    if (this.options.auth !== false) headers.Authorization = this.rest.getAuth();
+    if (this.options.auth != false) headers.Authorization = this.rest.getAuth();
     if (this.options.reason) headers['X-Audit-Log-Reason'] = encodeURIComponent(this.options.reason);
     if (this.options.headers) headers = Object.assign(headers, this.options.headers);
 
     let body;
     if (this.options.files?.length) {
       body = new FormData();
-      for (var a = 0, b = this.options.files.length; a !== b; ++a) {
+      for (var a = 0; a != this.options.files.length; ++a) {
         const file = this.options.files[a];
         if (file?.file) body.append(file.key ?? file.name, file.file, file.name);
       }
-      if (typeof this.options.data !== 'undefined') {
+      if (typeof this.options.data != 'undefined') {
         if (this.options.dontUsePayloadJSON) {
           const data = Object.entries(this.options.data);
-          for (var c = 0, d = data.length; c !== d; ++c) {
+          for (var c = 0; c != data.length; ++c) {
             const [k, v] = data[c];
             body.append(k, v);
           }

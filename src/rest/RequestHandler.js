@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 'use strict';
 
 const { AsyncQueue } = require('@sapphire/async-queue');
@@ -65,7 +66,7 @@ class RequestHandler {
   }
 
   get _inactive() {
-    return this.queue.remaining === 0 && !this.limited;
+    return this.queue.remaining == 0 && !this.limited;
   }
 
   globalDelayFor(ms) {
@@ -210,7 +211,7 @@ class RequestHandler {
     }
 
     // Count the invalid requests
-    if (res.statusCode === 401 || res.statusCode === 403 || res.statusCode === 429) {
+    if (res.statusCode == 401 || res.statusCode == 403 || res.statusCode == 429) {
       if (!invalidCountResetTime || invalidCountResetTime < Date.now()) {
         invalidCountResetTime = Date.now() + 1000 * 60 * 10;
         invalidCount = 0;
@@ -250,7 +251,7 @@ class RequestHandler {
     // Handle 4xx responses
     if (res.statusCode >= 400 && res.statusCode < 500) {
       // Handle ratelimited requests
-      if (res.statusCode === 429) {
+      if (res.statusCode == 429) {
         const isGlobal = this.globalLimited;
         let limit, timeout;
         if (isGlobal) {
