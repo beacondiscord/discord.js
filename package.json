@@ -54,7 +54,7 @@
     "@sapphire/async-queue": "^1.1.8",
     "@tbnritzdoge/events": "^1.0.5",
     "@types/ws": "^8.2.0",
-    "discord-api-types": "^0.23.1",
+    "discord-api-types": "^0.24.0",
     "petitio": "^1.4.0",
     "undici": "^3.3.6",
     "ws": "^8.2.3"
