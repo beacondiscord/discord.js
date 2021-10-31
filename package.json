@@ -49,14 +49,15 @@
   },
   "homepage": "https://discord.js.org",
   "dependencies": {
-    "@discordjs/builders": "^0.8.1",
-    "@discordjs/collection": "^0.3.2",
+    "@discordjs/builders": "^0.7.0",
+    "@discordjs/collection": "^0.2.4",
     "@discordjs/form-data": "^3.0.1",
     "@sapphire/async-queue": "^1.1.8",
-    "@types/node-fetch": "^2.5.12",
+    "@tbnritzdoge/events": "^1.0.5",
     "@types/ws": "^8.2.0",
     "discord-api-types": "^0.24.0",
-    "node-fetch": "^2.6.1",
+    "petitio": "^1.4.0",
+    "undici": "^3.3.6",
     "ws": "^8.2.3"
   },
   "devDependencies": {

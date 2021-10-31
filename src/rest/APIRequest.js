@@ -1,11 +1,12 @@
+/* eslint-disable eqeqeq */
 'use strict';
 
-const https = require('node:https');
 const FormData = require('@discordjs/form-data');
-const fetch = require('node-fetch');
+const fetch = require('petitio');
+const Client = require('undici/lib/core/client.js');
 const { UserAgent } = require('../util/Constants');
 
-let agent = null;
+const client = new Client('https://discord.com', { pipelining: 10, keepAliveTimeout: 300000 });
 
 class APIRequest {
   constructor(rest, method, path, options) {
@@ -30,10 +31,8 @@ class APIRequest {
   }
 
   make() {
-    agent ??= new https.Agent({ ...this.client.options.http.agent, keepAlive: true });
-
     const API =
-      this.options.versioned === false
+      this.options.versioned == false
         ? this.client.options.http.api
         : `${this.client.options.http.api}/v${this.client.options.http.version}`;
     const url = API + this.path;
@@ -43,22 +42,26 @@ class APIRequest {
       'User-Agent': this.fullUserAgent,
     };
 
-    if (this.options.auth !== false) headers.Authorization = this.rest.getAuth();
+    if (this.options.auth != false) headers.Authorization = this.rest.getAuth();
     if (this.options.reason) headers['X-Audit-Log-Reason'] = encodeURIComponent(this.options.reason);
     if (this.options.headers) headers = Object.assign(headers, this.options.headers);
 
     let body;
     if (this.options.files?.length) {
       body = new FormData();
-      for (const file of this.options.files) {
+      for (var a = 0; a != this.options.files.length; ++a) {
+        const file = this.options.files[a];
         if (file?.file) body.append(file.key ?? file.name, file.file, file.name);
       }
-      if (typeof this.options.data !== 'undefined') {
+      if (typeof this.options.data != 'undefined') {
         if (this.options.dontUsePayloadJSON) {
-          for (const [key, value] of Object.entries(this.options.data)) body.append(key, value);
-        } else {
-          body.append('payload_json', JSON.stringify(this.options.data));
-        }
+          const data = Object.entries(this.options.data);
+          for (var c = 0; c != data.length; ++c) {
+            const [k, v] = data[c];
+            body.append(k, v);
+          }
+          // eslint-disable-next-line curly
+        } else body.append('payload_json', JSON.stringify(this.options.data));
       }
       headers = Object.assign(headers, body.getHeaders());
       // eslint-disable-next-line eqeqeq
@@ -69,13 +72,14 @@ class APIRequest {
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.client.options.restRequestTimeout).unref();
-    return fetch(url, {
-      method: this.method,
-      headers,
-      agent,
-      body,
-      signal: controller.signal,
-    }).finally(() => clearTimeout(timeout));
+
+    const req = fetch(url, this.method.toUpperCase()).client(client, true);
+    if (body) req.body(body instanceof FormData ? body.getBuffer() : body);
+
+    return req
+      .header(headers)
+      .send()
+      .finally(() => clearTimeout(timeout));
   }
 }
 

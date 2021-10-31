@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const stream = require('node:stream');
-const fetch = require('node-fetch');
+const fetch = require('petitio');
 const { Error: DiscordError, TypeError } = require('../errors');
 const Invite = require('../structures/Invite');
 
@@ -109,7 +109,7 @@ class DataResolver extends null {
     if (Buffer.isBuffer(resource) || resource instanceof stream.Readable) return resource;
     if (typeof resource === 'string') {
       if (/^https?:\/\//.test(resource)) {
-        const res = await fetch(resource);
+        const res = await fetch(resource).send();
         return res.body;
       }
 

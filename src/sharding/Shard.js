@@ -1,7 +1,7 @@
 'use strict';
 
-const EventEmitter = require('node:events');
 const path = require('node:path');
+const EventEmitter = require('@tbnritzdoge/events');
 const { Error } = require('../errors');
 const Util = require('../util/Util');
 let childProcess = null;

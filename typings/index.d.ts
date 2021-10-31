@@ -1,3 +1,4 @@
+import EventEmitter from '@tbnritzdoge/events';
 import {
   blockQuote,
   bold,
@@ -46,12 +47,10 @@ import {
   RESTPostAPIApplicationCommandsJSONBody,
   Snowflake,
 } from 'discord-api-types/v9';
-import { ChildProcess } from 'node:child_process';
-import { EventEmitter } from 'node:events';
 import { AgentOptions } from 'node:https';
-import { Response } from 'node-fetch';
 import { Stream } from 'node:stream';
 import { MessagePort, Worker } from 'node:worker_threads';
+import { ChildProcess } from 'node:child_process';
 import * as WebSocket from 'ws';
 import {
   ActivityTypes,
@@ -1904,9 +1903,8 @@ export class ShardingManager extends EventEmitter {
   public respawnAll(options?: MultipleShardRespawnOptions): Promise<Collection<number, Shard>>;
   public spawn(options?: MultipleShardSpawnOptions): Promise<Collection<number, Shard>>;
 
-  public on(event: 'shardCreate', listener: (shard: Shard) => Awaitable<void>): this;
-
-  public once(event: 'shardCreate', listener: (shard: Shard) => Awaitable<void>): this;
+  public on<K = 'shardCreate'>(event: K, listener: (shard: Shard) => Awaitable<void>): this;
+  public once<K = 'shardCreate'>(event: K, listener: (shard: Shard) => Awaitable<void>): this;
 }
 
 export interface FetchRecommendedShardsOptions {
@@ -2317,8 +2315,8 @@ export class WebSocketManager extends EventEmitter {
   public status: Status;
   public readonly ping: number;
 
-  public on(event: WSEventType, listener: (data: any, shardId: number) => void): this;
-  public once(event: WSEventType, listener: (data: any, shardId: number) => void): this;
+  public on<K = WSEventType>(event: K, listener: (data: any, shardId: number) => void): this;
+  public once<K = WSEventType>(event: K, listener: (data: any, shardId: number) => void): this;
 
   private debug(message: string, shard?: WebSocketShard): void;
   private connect(): Promise<void>;
