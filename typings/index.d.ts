@@ -47,6 +47,7 @@ import {
   RESTPostAPIApplicationCommandsJSONBody,
   Snowflake,
 } from 'discord-api-types/v9';
+import { PetitioResponse } from 'petitio';
 import { AgentOptions } from 'node:https';
 import { Stream } from 'node:stream';
 import { MessagePort, Worker } from 'node:worker_threads';
@@ -3539,7 +3540,7 @@ export interface ChannelWebhookCreateOptions {
 }
 
 export interface ClientEvents {
-  apiResponse: [request: APIRequest, response: Response];
+  apiResponse: [request: APIRequest, response: PetitioResponse];
   apiRequest: [request: APIRequest];
   applicationCommandCreate: [command: ApplicationCommand];
   applicationCommandDelete: [command: ApplicationCommand];
