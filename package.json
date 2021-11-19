@@ -52,7 +52,7 @@
     "@discordjs/builders": "^0.8.2",
     "@discordjs/collection": "^0.3.2",
     "@discordjs/form-data": "^3.0.1",
-    "@sapphire/async-queue": "^1.1.8",
+    "@sapphire/async-queue": "^1.1.9",
     "@tbnritzdoge/events": "^1.0.5",
     "@types/ws": "^8.2.0",
     "discord-api-types": "^0.24.0",

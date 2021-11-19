@@ -51,7 +51,7 @@ class APIRequest {
       body = new FormData();
       for (var a = 0; a != this.options.files.length; ++a) {
         const file = this.options.files[a];
-        if (file?.file) body.append(file.key ?? file.name, file.file, file.name);
+        if (file?.file) body.append(file.key ?? `files[${a}]`, file.file, file.name);
       }
       if (typeof this.options.data != 'undefined') {
         if (this.options.dontUsePayloadJSON) {
