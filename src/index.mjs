@@ -9,6 +9,7 @@ export const ApplicationCommand = mod.ApplicationCommand;
 export const ApplicationCommandManager = mod.ApplicationCommandManager;
 export const ApplicationCommandPermissionsManager = mod.ApplicationCommandPermissionsManager;
 export const ApplicationFlags = mod.ApplicationFlags;
+export const AutocompleteInteraction = mod.AutocompleteInteraction;
 export const Base = mod.Base;
 export const BaseClient = mod.BaseClient;
 export const BaseCommandInteraction = mod.BaseCommandInteraction;
